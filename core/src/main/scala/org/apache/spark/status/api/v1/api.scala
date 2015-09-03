@@ -174,6 +174,7 @@ class ShuffleReadMetrics private[spark](
     val remoteBlocksFetched: Int,
     val localBlocksFetched: Int,
     val fetchWaitTime: Long,
+    val localBlocksFetchTime: Long,
     val remoteBytesRead: Long,
     val totalBlocksFetched: Int,
     val recordsRead: Long)

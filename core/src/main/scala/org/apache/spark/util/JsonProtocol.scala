@@ -320,6 +320,7 @@ private[spark] object JsonProtocol {
     ("Remote Blocks Fetched" -> shuffleReadMetrics.remoteBlocksFetched) ~
     ("Local Blocks Fetched" -> shuffleReadMetrics.localBlocksFetched) ~
     ("Fetch Wait Time" -> shuffleReadMetrics.fetchWaitTime) ~
+    ("Local Blocks Fetch Time" -> shuffleReadMetrics.localBlocksFetchTime) ~
     ("Remote Bytes Read" -> shuffleReadMetrics.remoteBytesRead) ~
     ("Local Bytes Read" -> shuffleReadMetrics.localBytesRead) ~
     ("Total Records Read" -> shuffleReadMetrics.recordsRead)
@@ -730,6 +731,7 @@ private[spark] object JsonProtocol {
     val metrics = new ShuffleReadMetrics
     metrics.incRemoteBlocksFetched((json \ "Remote Blocks Fetched").extract[Int])
     metrics.incLocalBlocksFetched((json \ "Local Blocks Fetched").extract[Int])
+    metrics.incLocalBlocksFetchTime((json \ "Local Blocks Fetch Time").extract[Long])
     metrics.incFetchWaitTime((json \ "Fetch Wait Time").extract[Long])
     metrics.incRemoteBytesRead((json \ "Remote Bytes Read").extract[Long])
     metrics.incLocalBytesRead((json \ "Local Bytes Read").extractOpt[Long].getOrElse(0))

@@ -201,6 +201,7 @@ class TaskMetrics extends Serializable {
       val merged = new ShuffleReadMetrics()
       for (depMetrics <- depsShuffleReadMetrics) {
         merged.incFetchWaitTime(depMetrics.fetchWaitTime)
+        merged.incLocalBlocksFetchTime(depMetrics.localBlocksFetchTime)
         merged.incLocalBlocksFetched(depMetrics.localBlocksFetched)
         merged.incRemoteBlocksFetched(depMetrics.remoteBlocksFetched)
         merged.incRemoteBytesRead(depMetrics.remoteBytesRead)
@@ -361,6 +362,14 @@ class ShuffleReadMetrics extends Serializable {
   private[spark] def decLocalBlocksFetched(value: Int) = _localBlocksFetched -= value
 
   /**
+   * Time the task took to fetch local blocks (milliseconds)
+   */
+  private var _localBlocksFetchTime: Long = _
+  def localBlocksFetchTime: Long = _localBlocksFetchTime
+  private[spark] def incLocalBlocksFetchTime(value: Long) = _localBlocksFetchTime += value
+  private[spark] def decLocalBlocksFetchTime(value: Long) = _localBlocksFetchTime -= value
+
+  /**
    * Time the task spent waiting for remote shuffle blocks. This only includes the time
    * blocking on shuffle input data. For instance if block B is being fetched while the task is
    * still not finished processing block A, it is not considered to be blocking on block B.
@@ -425,6 +434,8 @@ class ShuffleWriteMetrics extends Serializable {
   def shuffleWriteTime: Long = _shuffleWriteTime
   private[spark] def incShuffleWriteTime(value: Long) = _shuffleWriteTime += value
   private[spark] def decShuffleWriteTime(value: Long) = _shuffleWriteTime -= value
+
+
 
   /**
    * Total number of records written to the shuffle by this task

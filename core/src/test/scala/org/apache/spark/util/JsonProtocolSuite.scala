@@ -537,6 +537,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(metrics1.remoteBlocksFetched === metrics2.remoteBlocksFetched)
     assert(metrics1.localBlocksFetched === metrics2.localBlocksFetched)
     assert(metrics1.fetchWaitTime === metrics2.fetchWaitTime)
+    assert(metrics1.localBlocksFetchTime === metrics2.localBlocksFetchTime)
     assert(metrics1.remoteBytesRead === metrics2.remoteBytesRead)
   }
 
@@ -747,6 +748,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       sr.incRemoteBytesRead(b + d)
       sr.incLocalBlocksFetched(e)
       sr.incFetchWaitTime(a + d)
+      sr.incLocalBlocksFetchTime(a + d)
       sr.incRemoteBlocksFetched(f)
       sr.incRecordsRead(if (hasRecords) (b + d) / 100 else -1)
       sr.incLocalBytesRead(a + f)

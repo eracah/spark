@@ -263,6 +263,7 @@ private[v1] object AllStagesResource {
       remoteBlocksFetched = internal.remoteBlocksFetched,
       localBlocksFetched = internal.localBlocksFetched,
       fetchWaitTime = internal.fetchWaitTime,
+      localBlocksFetchTime = internal.localBlocksFetchTime,
       remoteBytesRead = internal.remoteBytesRead,
       totalBlocksFetched = internal.totalBlocksFetched,
       recordsRead = internal.recordsRead

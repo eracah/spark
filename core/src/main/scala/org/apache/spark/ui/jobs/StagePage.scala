@@ -425,6 +425,10 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
           val shuffleReadBlockedTimes = validTasks.map { case TaskUIData(_, metrics, _) =>
             metrics.get.shuffleReadMetrics.map(_.fetchWaitTime).getOrElse(0L).toDouble
           }
+
+//          val shuffleLocalReadTimes = validTasks.map { case TaskUIData(_, metrics, _) =>
+//            metrics.get.shuffleReadMetrics.map(_.localBlocksFetchTime).getOrElse(0L).toDouble
+//          }
           val shuffleReadBlockedQuantiles =
             <td>
               <span data-toggle="tooltip"
@@ -578,6 +582,8 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
         val metricsOpt = taskUIData.taskMetrics
         val shuffleReadTime =
           metricsOpt.flatMap(_.shuffleReadMetrics.map(_.fetchWaitTime)).getOrElse(0L)
+//        val shuffleLocalReadTime =
+//          metricsOpt.flatMap(_.shuffleReadMetrics.map(_.localBlocksFetchTime)).getOrElse(0L)
         val shuffleReadTimeProportion = toProportion(shuffleReadTime)
         val shuffleWriteTime =
           (metricsOpt.flatMap(_.shuffleWriteMetrics
@@ -881,7 +887,9 @@ private[ui] class TaskDataSource(
     val shuffleReadBlockedTimeSortable = maybeShuffleRead.map(_.fetchWaitTime).getOrElse(0L)
     val shuffleReadBlockedTimeReadable =
       maybeShuffleRead.map(ms => UIUtils.formatDuration(ms.fetchWaitTime)).getOrElse("")
-
+//    val shuffleLocalReadTimeSortable = maybeShuffleRead.map(_.localBlocksFetchTime).getOrElse(0L)
+//    val shuffleLocalReadTimeReadable =
+//      maybeShuffleRead.map(ms => UIUtils.formatDuration(ms.localBlocksFetchTime)).getOrElse("")
     val totalShuffleBytes = maybeShuffleRead.map(_.totalBytesRead)
     val shuffleReadSortable = totalShuffleBytes.getOrElse(0L)
     val shuffleReadReadable = totalShuffleBytes.map(Utils.bytesToString).getOrElse("")
