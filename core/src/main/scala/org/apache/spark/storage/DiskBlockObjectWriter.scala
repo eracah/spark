@@ -80,34 +80,41 @@ private[spark] class DiskBlockObjectWriter(
    * output bytes written since the latter is expensive to do for each record.
    */
   private var numRecordsWritten = 0
+  val path = file.getPath()
+  logInfo(s"The file path to write to is called $path.")
 
   def open(): DiskBlockObjectWriter = {
     if (hasBeenClosed) {
       throw new IllegalStateException("Writer already closed. Cannot be reopened.")
     }
+    val openStartTime: Long = System.nanoTime()
     fos = new FileOutputStream(file, true)
     ts = new TimeTrackingOutputStream(writeMetrics, fos)
     channel = fos.getChannel()
     bs = compressStream(new BufferedOutputStream(ts, bufferSize))
     objOut = serializerInstance.serializeStream(bs)
     initialized = true
+    writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - openStartTime)
     this
   }
 
   override def close() {
+    val closeStartTime: Long = System.nanoTime()
     if (initialized) {
       Utils.tryWithSafeFinally {
         if (syncWrites) {
+
           // Force outstanding writes to disk and track how long it takes
           objOut.flush()
           val start = System.nanoTime()
           fos.getFD.sync()
           writeMetrics.incShuffleWriteTime(System.nanoTime() - start)
+
         }
       } {
         objOut.close()
       }
-
+      writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - closeStartTime)
       channel = null
       bs = null
       fos = null
@@ -127,12 +134,16 @@ private[spark] class DiskBlockObjectWriter(
     if (initialized) {
       // NOTE: Because Kryo doesn't flush the underlying stream we explicitly flush both the
       //       serializer stream and the lower level stream.
+      val commitAndCloseStartTime: Long = System.nanoTime()
       objOut.flush()
       bs.flush()
+      // before close call b/c we already instrumented close
+      writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - commitAndCloseStartTime)
       close()
       finalPosition = file.length()
       // In certain compression codecs, more bytes are written after close() is called
       writeMetrics.incShuffleBytesWritten(finalPosition - reportedPosition)
+
     } else {
       finalPosition = file.length()
     }
@@ -152,9 +163,12 @@ private[spark] class DiskBlockObjectWriter(
       if (initialized) {
         writeMetrics.decShuffleBytesWritten(reportedPosition - initialPosition)
         writeMetrics.decShuffleRecordsWritten(numRecordsWritten)
+        val revertPartialWritesAndCloseStartTime: Long = System.nanoTime()
         objOut.flush()
         bs.flush()
+        writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - revertPartialWritesAndCloseStartTime)
         close()
+
       }
 
       val truncateStream = new FileOutputStream(file, true)
@@ -173,12 +187,14 @@ private[spark] class DiskBlockObjectWriter(
    * Writes a key-value pair.
    */
   def write(key: Any, value: Any) {
+
     if (!initialized) {
       open()
     }
-
+    val writeKeyStartTime: Long = System.nanoTime()
     objOut.writeKey(key)
     objOut.writeValue(value)
+    writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - writeKeyStartTime)
     recordWritten()
   }
 
@@ -188,8 +204,9 @@ private[spark] class DiskBlockObjectWriter(
     if (!initialized) {
       open()
     }
-
+    val writeKeyStartTime: Long = System.nanoTime()
     bs.write(kvBytes, offs, len)
+    writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - writeKeyStartTime)
   }
 
   /**

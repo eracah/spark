@@ -539,11 +539,14 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(metrics1.fetchWaitTime === metrics2.fetchWaitTime)
     assert(metrics1.localBlocksFetchTime === metrics2.localBlocksFetchTime)
     assert(metrics1.remoteBytesRead === metrics2.remoteBytesRead)
+    assert(metrics1.shuffleReadCallTime === metrics2.shuffleReadCallTime)
   }
 
   private def assertEquals(metrics1: ShuffleWriteMetrics, metrics2: ShuffleWriteMetrics) {
     assert(metrics1.shuffleBytesWritten === metrics2.shuffleBytesWritten)
+    assert(metrics1.ramOrDiskWriteTime === metrics2.ramOrDiskWriteTime)
     assert(metrics1.shuffleWriteTime === metrics2.shuffleWriteTime)
+    assert(metrics1.shuffleWriteCallTime === metrics2.shuffleWriteCallTime)
   }
 
   private def assertEquals(metrics1: InputMetrics, metrics2: InputMetrics) {

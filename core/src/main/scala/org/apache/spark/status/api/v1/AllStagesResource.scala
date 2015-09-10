@@ -191,7 +191,9 @@ private[v1] object AllStagesResource {
           remoteBlocksFetched = submetricQuantiles(_.remoteBlocksFetched),
           localBlocksFetched = submetricQuantiles(_.localBlocksFetched),
           totalBlocksFetched = submetricQuantiles(_.totalBlocksFetched),
-          fetchWaitTime = submetricQuantiles(_.fetchWaitTime)
+          fetchWaitTime = submetricQuantiles(_.fetchWaitTime),
+          localBlocksFetchTime = submetricQuantiles(_.localBlocksFetchTime),
+          shuffleReadCallTime = submetricQuantiles(_.shuffleReadCallTime)
         )
       }.metricOption
 
@@ -204,7 +206,9 @@ private[v1] object AllStagesResource {
         def build: ShuffleWriteMetricDistributions = new ShuffleWriteMetricDistributions(
           writeBytes = submetricQuantiles(_.shuffleBytesWritten),
           writeRecords = submetricQuantiles(_.shuffleRecordsWritten),
-          writeTime = submetricQuantiles(_.shuffleWriteTime)
+          writeTime = submetricQuantiles(_.shuffleWriteTime),
+          writeCallTime = submetricQuantiles(_.shuffleWriteCallTime),
+          ramOrDiskWriteTime = submetricQuantiles(_.ramOrDiskWriteTime)
         )
       }.metricOption
 
@@ -266,7 +270,8 @@ private[v1] object AllStagesResource {
       localBlocksFetchTime = internal.localBlocksFetchTime,
       remoteBytesRead = internal.remoteBytesRead,
       totalBlocksFetched = internal.totalBlocksFetched,
-      recordsRead = internal.recordsRead
+      recordsRead = internal.recordsRead,
+      shuffleReadCallTime = internal.shuffleReadCallTime
     )
   }
 
@@ -274,7 +279,9 @@ private[v1] object AllStagesResource {
     new ShuffleWriteMetrics(
       bytesWritten = internal.shuffleBytesWritten,
       writeTime = internal.shuffleWriteTime,
-      recordsWritten = internal.shuffleRecordsWritten
+      recordsWritten = internal.shuffleRecordsWritten,
+      writeCallTime = internal.shuffleWriteCallTime,
+      ramOrDiskWriteTime = internal.ramOrDiskWriteTime
     )
   }
 }

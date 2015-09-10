@@ -201,6 +201,7 @@ class TaskMetrics extends Serializable {
       val merged = new ShuffleReadMetrics()
       for (depMetrics <- depsShuffleReadMetrics) {
         merged.incFetchWaitTime(depMetrics.fetchWaitTime)
+        merged.incShuffleReadCallTime(depMetrics.shuffleReadCallTime)
         merged.incLocalBlocksFetchTime(depMetrics.localBlocksFetchTime)
         merged.incLocalBlocksFetched(depMetrics.localBlocksFetched)
         merged.incRemoteBlocksFetched(depMetrics.remoteBlocksFetched)
@@ -380,6 +381,16 @@ class ShuffleReadMetrics extends Serializable {
   private[spark] def decFetchWaitTime(value: Long) = _fetchWaitTime -= value
 
   /**
+   * Time the task spent waiting for remote shuffle blocks. This only includes the time
+   * blocking on shuffle input data. For instance if block B is being fetched while the task is
+   * still not finished processing block A, it is not considered to be blocking on block B.
+   */
+  private var _shuffleReadCallTime: Long = _
+  def shuffleReadCallTime: Long = _shuffleReadCallTime
+  private[spark] def incShuffleReadCallTime(value: Long) = _shuffleReadCallTime += value
+  private[spark] def decShuffleReadCallTime(value: Long) = _shuffleReadCallTime -= value
+
+  /**
    * Total number of remote bytes read from the shuffle by this task
    */
   private var _remoteBytesRead: Long = _
@@ -434,6 +445,24 @@ class ShuffleWriteMetrics extends Serializable {
   def shuffleWriteTime: Long = _shuffleWriteTime
   private[spark] def incShuffleWriteTime(value: Long) = _shuffleWriteTime += value
   private[spark] def decShuffleWriteTime(value: Long) = _shuffleWriteTime -= value
+
+  /**
+   * Time spent on writes to ram, disk or buffer cache, in nanoseconds
+   */
+  @volatile private var _ramOrDiskWriteTime: Long = _
+  def ramOrDiskWriteTime: Long = _ramOrDiskWriteTime
+  private[spark] def incRamOrDiskWriteTime(value: Long) = _ramOrDiskWriteTime += value
+  private[spark] def decRamOrDiskWriteTime(value: Long) = _ramOrDiskWriteTime -= value
+
+  /**
+   * Time the task spent calling the high level write call from SortShuffleWriter
+   */
+  @volatile private var _shuffleWriteCallTime: Long = _
+  def shuffleWriteCallTime: Long = _shuffleWriteCallTime
+  private[spark] def incShuffleWriteCallTime(value: Long) = _shuffleWriteCallTime += value
+  private[spark] def decShuffleWriteCallTime(value: Long) = _shuffleWriteCallTime -= value
+
+
 
 
 

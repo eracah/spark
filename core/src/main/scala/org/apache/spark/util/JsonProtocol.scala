@@ -323,12 +323,15 @@ private[spark] object JsonProtocol {
     ("Local Blocks Fetch Time" -> shuffleReadMetrics.localBlocksFetchTime) ~
     ("Remote Bytes Read" -> shuffleReadMetrics.remoteBytesRead) ~
     ("Local Bytes Read" -> shuffleReadMetrics.localBytesRead) ~
+    ("Shuffle Read Call Time" -> shuffleReadMetrics.shuffleReadCallTime) ~
     ("Total Records Read" -> shuffleReadMetrics.recordsRead)
   }
 
   def shuffleWriteMetricsToJson(shuffleWriteMetrics: ShuffleWriteMetrics): JValue = {
     ("Shuffle Bytes Written" -> shuffleWriteMetrics.shuffleBytesWritten) ~
     ("Shuffle Write Time" -> shuffleWriteMetrics.shuffleWriteTime) ~
+    ("Shuffle Write Call Time" -> shuffleWriteMetrics.shuffleWriteCallTime) ~
+    ("Ram or Disk Write Time" -> shuffleWriteMetrics.ramOrDiskWriteTime) ~
     ("Shuffle Records Written" -> shuffleWriteMetrics.shuffleRecordsWritten)
   }
 

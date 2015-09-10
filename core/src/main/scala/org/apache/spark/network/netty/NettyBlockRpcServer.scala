@@ -48,9 +48,9 @@ class NettyBlockRpcServer(
       client: TransportClient,
       messageBytes: Array[Byte],
       responseContext: RpcResponseCallback): Unit = {
+    val startTime = System.nanoTime()
     val message = BlockTransferMessage.Decoder.fromByteArray(messageBytes)
     logTrace(s"Received request: $message")
-
     message match {
       case openBlocks: OpenBlocks =>
         val blocks: Seq[ManagedBuffer] =
@@ -58,6 +58,8 @@ class NettyBlockRpcServer(
         val streamId = streamManager.registerStream(blocks.iterator)
         logTrace(s"Registered streamId $streamId with ${blocks.size} buffers")
         responseContext.onSuccess(new StreamHandle(streamId, blocks.size).toByteArray)
+        val timeToRead = System.nanoTime() - startTime
+        logDebug(s"Instru: Opening shuffle block took $timeToRead nanoseconds")
 
       case uploadBlock: UploadBlock =>
         // StorageLevel is serialized as bytes using our JavaSerializer.
@@ -66,6 +68,9 @@ class NettyBlockRpcServer(
         val data = new NioManagedBuffer(ByteBuffer.wrap(uploadBlock.blockData))
         blockManager.putBlockData(BlockId(uploadBlock.blockId), data, level)
         responseContext.onSuccess(new Array[Byte](0))
+        val timeToRead = System.nanoTime() - startTime
+        logDebug(s"Instru: Uploading shuffle block took $timeToRead nanoseconds")
+
     }
   }
 

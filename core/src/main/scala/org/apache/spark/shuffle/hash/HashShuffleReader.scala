@@ -40,6 +40,7 @@ private[spark] class HashShuffleReader[K, C](
 
   /** Read the combined key-values for this reduce task */
   override def read(): Iterator[Product2[K, C]] = {
+    val shuffleReadCallTime = System.nanoTime()
     val blockFetcherItr = new ShuffleBlockFetcherIterator(
       context,
       blockManager.shuffleClient,
@@ -104,8 +105,10 @@ private[spark] class HashShuffleReader[K, C](
         context.taskMetrics().incDiskBytesSpilled(sorter.diskBytesSpilled)
         context.internalMetricsToAccumulators(
           InternalAccumulator.PEAK_EXECUTION_MEMORY).add(sorter.peakMemoryUsedBytes)
+        readMetrics.incShuffleReadCallTime(System.nanoTime() - shuffleReadCallTime)
         sorter.iterator
       case None =>
+        readMetrics.incShuffleReadCallTime(System.nanoTime() - shuffleReadCallTime)
         aggregatedIter
     }
   }

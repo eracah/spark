@@ -256,9 +256,9 @@ class StatsReportListener extends SparkListener with Logging {
     // Fetch & I/O
     showMillisDistribution("fetch wait time:",
       (_, metric) => metric.shuffleReadMetrics.map(_.fetchWaitTime), taskInfoMetrics)
-    // Local Fetch & I/O
-    showMillisDistribution("local fetch wait time:",
-      (_, metric) => metric.shuffleReadMetrics.map(_.localBlocksFetchTime), taskInfoMetrics)
+//    // Local Fetch & I/O
+//    showMillisDistribution("local fetch wait time:",
+//      (_, metric) => metric.shuffleReadMetrics.map(_.localBlocksFetchTime), taskInfoMetrics)
     showBytesDistribution("remote bytes read:",
       (_, metric) => metric.shuffleReadMetrics.map(_.remoteBytesRead), taskInfoMetrics)
     showBytesDistribution("task result size:",

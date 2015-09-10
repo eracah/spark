@@ -50,6 +50,7 @@ private[spark] class SortShuffleWriter[K, V, C](
 
   /** Write a bunch of records to this task's output */
   override def write(records: Iterator[Product2[K, V]]): Unit = {
+    val writeCallStartTime = System.nanoTime()
     sorter = if (dep.mapSideCombine) {
       require(dep.aggregator.isDefined, "Map-side combine without Aggregator specified!")
       new ExternalSorter[K, V, C](
@@ -81,10 +82,15 @@ private[spark] class SortShuffleWriter[K, V, C](
     shuffleBlockResolver.writeIndexFile(dep.shuffleId, mapId, partitionLengths)
 
     mapStatus = MapStatus(blockManager.shuffleServerId, partitionLengths)
+    context.taskMetrics.shuffleWriteMetrics.foreach(
+      _.incShuffleWriteCallTime(System.nanoTime - writeCallStartTime))
+
+
   }
 
   /** Close this writer, passing along whether the map completed */
   override def stop(success: Boolean): Option[MapStatus] = {
+    val writeCallStartTime = System.nanoTime()
     try {
       if (stopping) {
         return None
@@ -104,6 +110,8 @@ private[spark] class SortShuffleWriter[K, V, C](
         sorter.stop()
         context.taskMetrics.shuffleWriteMetrics.foreach(
           _.incShuffleWriteTime(System.nanoTime - startTime))
+        context.taskMetrics.shuffleWriteMetrics.foreach(
+          _.incShuffleWriteCallTime(System.nanoTime - writeCallStartTime))
         sorter = null
       }
     }

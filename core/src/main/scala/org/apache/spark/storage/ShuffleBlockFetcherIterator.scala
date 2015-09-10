@@ -269,7 +269,7 @@ final class ShuffleBlockFetcherIterator(
     logInfo("Started " + numFetches + " remote fetches in" + Utils.getUsedTimeMs(startTime))
 
     // Get Local Blocks
-    val startFetch: Long = System.currentTimeMillis()
+    val startFetch: Long = System.nanoTime()
     fetchLocalBlocks()
     shuffleMetrics.incLocalBlocksFetchTime(System.nanoTime() - startFetch)
     logDebug("Got local blocks in " + Utils.getUsedTimeMs(startTime))
