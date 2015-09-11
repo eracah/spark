@@ -203,6 +203,7 @@ class TaskMetrics extends Serializable {
         merged.incFetchWaitTime(depMetrics.fetchWaitTime)
         merged.incShuffleReadCallTime(depMetrics.shuffleReadCallTime)
         merged.incLocalBlocksFetchTime(depMetrics.localBlocksFetchTime)
+        merged.incRemoteBlocksFetchTime(depMetrics.remoteBlocksFetchTime)
         merged.incLocalBlocksFetched(depMetrics.localBlocksFetched)
         merged.incRemoteBlocksFetched(depMetrics.remoteBlocksFetched)
         merged.incRemoteBytesRead(depMetrics.remoteBytesRead)
@@ -363,12 +364,20 @@ class ShuffleReadMetrics extends Serializable {
   private[spark] def decLocalBlocksFetched(value: Int) = _localBlocksFetched -= value
 
   /**
-   * Time the task took to fetch local blocks (milliseconds)
+   * Time the task took to fetch local blocks (nanoseconds)
    */
   private var _localBlocksFetchTime: Long = _
   def localBlocksFetchTime: Long = _localBlocksFetchTime
   private[spark] def incLocalBlocksFetchTime(value: Long) = _localBlocksFetchTime += value
   private[spark] def decLocalBlocksFetchTime(value: Long) = _localBlocksFetchTime -= value
+
+  /**
+   * Time the task took to fetch remote blocks (nanoseconds)
+   */
+  private var _remoteBlocksFetchTime: Long = _
+  def remoteBlocksFetchTime: Long = _remoteBlocksFetchTime
+  private[spark] def incRemoteBlocksFetchTime(value: Long) = _remoteBlocksFetchTime += value
+  private[spark] def decRemoteBlocksFetchTime(value: Long) = _remoteBlocksFetchTime -= value
 
   /**
    * Time the task spent waiting for remote shuffle blocks. This only includes the time

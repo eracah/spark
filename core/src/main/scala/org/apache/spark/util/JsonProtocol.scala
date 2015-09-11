@@ -324,6 +324,7 @@ private[spark] object JsonProtocol {
     ("Remote Bytes Read" -> shuffleReadMetrics.remoteBytesRead) ~
     ("Local Bytes Read" -> shuffleReadMetrics.localBytesRead) ~
     ("Shuffle Read Call Time" -> shuffleReadMetrics.shuffleReadCallTime) ~
+    ("Remote Blocks Fetch Time" -> shuffleReadMetrics.remoteBlocksFetchTime) ~
     ("Total Records Read" -> shuffleReadMetrics.recordsRead)
   }
 
@@ -735,7 +736,9 @@ private[spark] object JsonProtocol {
     metrics.incRemoteBlocksFetched((json \ "Remote Blocks Fetched").extract[Int])
     metrics.incLocalBlocksFetched((json \ "Local Blocks Fetched").extract[Int])
     metrics.incLocalBlocksFetchTime((json \ "Local Blocks Fetch Time").extract[Long])
+    metrics.incRemoteBlocksFetchTime((json \ "Remote Blocks Fetch Time").extract[Long])
     metrics.incFetchWaitTime((json \ "Fetch Wait Time").extract[Long])
+    metrics.incShuffleReadCallTime((json \ "Shuffle Read Call Time").extract[Long])
     metrics.incRemoteBytesRead((json \ "Remote Bytes Read").extract[Long])
     metrics.incLocalBytesRead((json \ "Local Bytes Read").extractOpt[Long].getOrElse(0))
     metrics.incRecordsRead((json \ "Total Records Read").extractOpt[Long].getOrElse(0))
@@ -746,6 +749,8 @@ private[spark] object JsonProtocol {
     val metrics = new ShuffleWriteMetrics
     metrics.incShuffleBytesWritten((json \ "Shuffle Bytes Written").extract[Long])
     metrics.incShuffleWriteTime((json \ "Shuffle Write Time").extract[Long])
+    metrics.incShuffleWriteCallTime((json \ "Shuffle Write Call Time").extract[Long])
+    metrics.incRamOrDiskWriteTime((json \ "Ram or Disk Write Time").extract[Long])
     metrics.setShuffleRecordsWritten((json \ "Shuffle Records Written")
       .extractOpt[Long].getOrElse(0))
     metrics

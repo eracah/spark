@@ -193,6 +193,7 @@ private[v1] object AllStagesResource {
           totalBlocksFetched = submetricQuantiles(_.totalBlocksFetched),
           fetchWaitTime = submetricQuantiles(_.fetchWaitTime),
           localBlocksFetchTime = submetricQuantiles(_.localBlocksFetchTime),
+          remoteBlocksFetchTime = submetricQuantiles(_.remoteBlocksFetchTime),
           shuffleReadCallTime = submetricQuantiles(_.shuffleReadCallTime)
         )
       }.metricOption
@@ -268,6 +269,7 @@ private[v1] object AllStagesResource {
       localBlocksFetched = internal.localBlocksFetched,
       fetchWaitTime = internal.fetchWaitTime,
       localBlocksFetchTime = internal.localBlocksFetchTime,
+      remoteBlocksFetchTime = internal.remoteBlocksFetchTime,
       remoteBytesRead = internal.remoteBytesRead,
       totalBlocksFetched = internal.totalBlocksFetched,
       recordsRead = internal.recordsRead,

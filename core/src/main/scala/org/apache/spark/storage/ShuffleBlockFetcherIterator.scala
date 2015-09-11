@@ -140,6 +140,7 @@ final class ShuffleBlockFetcherIterator(
   }
 
   private[this] def sendRequest(req: FetchRequest) {
+    val fetchStartTime: Long = System.nanoTime()
     logDebug("Sending request for %d blocks (%s) from %s".format(
       req.blocks.size, Utils.bytesToString(req.size), req.address.hostPort))
     bytesInFlight += req.size
@@ -163,6 +164,7 @@ final class ShuffleBlockFetcherIterator(
             shuffleMetrics.incRemoteBlocksFetched(1)
           }
           logTrace("Got remote block " + blockId + " after " + Utils.getUsedTimeMs(startTime))
+          shuffleMetrics.incRemoteBlocksFetchTime(System.nanoTime() - fetchStartTime)
         }
 
         override def onBlockFetchFailure(blockId: String, e: Throwable): Unit = {

@@ -172,6 +172,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
         " BLOCK_FETCHED_REMOTE=" + metrics.remoteBlocksFetched +
         " REMOTE_FETCH_WAIT_TIME=" + metrics.fetchWaitTime +
         " LOCAL_FETCH_WAIT_TIME=" + metrics.localBlocksFetchTime +
+        " REMOTE_FETCH_WAIT_TIME=" + metrics.remoteBlocksFetchTime +
         " REMOTE_BYTES_READ=" + metrics.remoteBytesRead +
         " LOCAL_BYTES_READ=" + metrics.localBytesRead
       case None => ""

@@ -175,6 +175,7 @@ class ShuffleReadMetrics private[spark](
     val localBlocksFetched: Int,
     val fetchWaitTime: Long,
     val localBlocksFetchTime: Long,
+    val remoteBlocksFetchTime: Long,
     val remoteBytesRead: Long,
     val totalBlocksFetched: Int,
     val recordsRead: Long,
@@ -220,6 +221,7 @@ class ShuffleReadMetricDistributions private[spark](
     val remoteBytesRead: IndexedSeq[Double],
     val totalBlocksFetched: IndexedSeq[Double],
     val localBlocksFetchTime: IndexedSeq[Double],
+    val remoteBlocksFetchTime: IndexedSeq[Double],
     val shuffleReadCallTime: IndexedSeq[Double])
 
 class ShuffleWriteMetricDistributions private[spark](
