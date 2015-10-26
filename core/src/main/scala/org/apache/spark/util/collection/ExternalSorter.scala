@@ -156,6 +156,10 @@ private[spark] class ExternalSorter[K, V, C](
   private var _peakMemoryUsedBytes: Long = 0L
   def peakMemoryUsedBytes: Long = _peakMemoryUsedBytes
 
+   // Peak size of the in-memory data structure observed so far, in bytes
+  private var _shuffleWriteTime: Long = 0.0
+  def shuffleWriteTime: Long = _shuffleWriteTime
+
   // A comparator for keys K that orders them within a partition to allow aggregation or sorting.
   // Can be a partial ordering by hash code if a total ordering is not provided through by the
   // user. (A partial ordering means that equal keys have comparator.compare(k, k) = 0, but some
@@ -680,11 +684,13 @@ private[spark] class ExternalSorter[K, V, C](
       }
     } else {
       // We must perform merge-sort; get an iterator by partition and write everything directly.
+      val openStartTime = System.nanoTime
       for ((id, elements) <- this.partitionedIterator) {
         if (elements.hasNext) {
           val writer = blockManager.getDiskWriter(blockId, outputFile, serInstance, fileBufferSize,
             context.taskMetrics.shuffleWriteMetrics.get)
           for (elem <- elements) {
+            //opens and writes here
             writer.write(elem._1, elem._2)
           }
           writer.commitAndClose()
@@ -692,10 +698,12 @@ private[spark] class ExternalSorter[K, V, C](
           lengths(id) = segment.length
         }
       }
+      _shuffleWriteTime += System.nanoTime - openStartTime
     }
 
     context.taskMetrics().incMemoryBytesSpilled(memoryBytesSpilled)
     context.taskMetrics().incDiskBytesSpilled(diskBytesSpilled)
+    context.taskMetrics().incShuffleWriteTime(shuffleWriteTime)
     context.internalMetricsToAccumulators(
       InternalAccumulator.PEAK_EXECUTION_MEMORY).add(peakMemoryUsedBytes)
 
