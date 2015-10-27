@@ -87,14 +87,14 @@ private[spark] class DiskBlockObjectWriter(
     if (hasBeenClosed) {
       throw new IllegalStateException("Writer already closed. Cannot be reopened.")
     }
-    val openStartTime: Long = System.nanoTime()
+    //val openStartTime: Long = System.nanoTime()
     fos = new FileOutputStream(file, true)
     ts = new TimeTrackingOutputStream(writeMetrics, fos)
     channel = fos.getChannel()
     bs = compressStream(new BufferedOutputStream(ts, bufferSize))
     objOut = serializerInstance.serializeStream(bs)
     initialized = true
-    writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - openStartTime)
+    //writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - openStartTime)
     this
   }
 
@@ -187,11 +187,10 @@ private[spark] class DiskBlockObjectWriter(
    * Writes a key-value pair.
    */
   def write(key: Any, value: Any) {
-
+    val writeKeyStartTime: Long = System.nanoTime()
     if (!initialized) {
       open()
     }
-    val writeKeyStartTime: Long = System.nanoTime()
     objOut.writeKey(key)
     objOut.writeValue(value)
     writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - writeKeyStartTime)
@@ -201,10 +200,10 @@ private[spark] class DiskBlockObjectWriter(
   override def write(b: Int): Unit = throw new UnsupportedOperationException()
 
   override def write(kvBytes: Array[Byte], offs: Int, len: Int): Unit = {
+    val writeKeyStartTime: Long = System.nanoTime()
     if (!initialized) {
       open()
     }
-    val writeKeyStartTime: Long = System.nanoTime()
     bs.write(kvBytes, offs, len)
     writeMetrics.incRamOrDiskWriteTime(System.nanoTime() - writeKeyStartTime)
   }
