@@ -292,6 +292,7 @@ private[spark] class ExternalSorter[K, V, C](
 
     var success = false
     try {
+      val spillStart = System.nanoTime()
       val it = collection.destructiveSortedWritablePartitionedIterator(comparator)
       while (it.hasNext) {
         val partitionId = it.nextPartition()
@@ -304,6 +305,7 @@ private[spark] class ExternalSorter[K, V, C](
           openWriter()
         }
       }
+
       if (objectsWritten > 0) {
         flush()
       } else if (writer != null) {
@@ -311,6 +313,7 @@ private[spark] class ExternalSorter[K, V, C](
         writer = null
         w.revertPartialWritesAndClose()
       }
+      val spillTime = System.nanoTime() - spillStart
       success = true
     } finally {
       if (!success) {
@@ -684,7 +687,7 @@ private[spark] class ExternalSorter[K, V, C](
       }
     } else {
       // We must perform merge-sort; get an iterator by partition and write everything directly.
-      val openStartTime = System.nanoTime
+      val openStartTime = System.nanoTime()
       for ((id, elements) <- this.partitionedIterator) {
         if (elements.hasNext) {
           val writer = blockManager.getDiskWriter(blockId, outputFile, serInstance, fileBufferSize,
@@ -698,12 +701,12 @@ private[spark] class ExternalSorter[K, V, C](
           lengths(id) = segment.length
         }
       }
-      _shuffleWriteTime += System.nanoTime - openStartTime
+      _shuffleWriteTime += System.nanoTime() - openStartTime
     }
 
     context.taskMetrics().incMemoryBytesSpilled(memoryBytesSpilled)
     context.taskMetrics().incDiskBytesSpilled(diskBytesSpilled)
-    context.taskMetrics().incShuffleWriteTime(shuffleWriteTime)
+    context.taskMetrics.shuffleWriteMetrics.foreach { m => m.incShuffleWriteTime(shuffleWriteTime) }
     context.internalMetricsToAccumulators(
       InternalAccumulator.PEAK_EXECUTION_MEMORY).add(peakMemoryUsedBytes)
 
