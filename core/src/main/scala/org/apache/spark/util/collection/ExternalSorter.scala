@@ -157,7 +157,7 @@ private[spark] class ExternalSorter[K, V, C](
   def peakMemoryUsedBytes: Long = _peakMemoryUsedBytes
 
    // Peak size of the in-memory data structure observed so far, in bytes
-  private var _shuffleWriteTime: Long = 0.0
+  private var _shuffleWriteTime: Long = 0L
   def shuffleWriteTime: Long = _shuffleWriteTime
 
   // A comparator for keys K that orders them within a partition to allow aggregation or sorting.
