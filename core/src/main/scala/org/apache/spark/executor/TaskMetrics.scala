@@ -378,6 +378,7 @@ class ShuffleReadMetrics extends Serializable {
   def remoteBlocksFetchTime: Long = _remoteBlocksFetchTime
   private[spark] def incRemoteBlocksFetchTime(value: Long) = _remoteBlocksFetchTime += value
   private[spark] def decRemoteBlocksFetchTime(value: Long) = _remoteBlocksFetchTime -= value
+  //var remoteBlocksFinishTime: Long = _
 
   /**
    * Time the task spent waiting for remote shuffle blocks. This only includes the time

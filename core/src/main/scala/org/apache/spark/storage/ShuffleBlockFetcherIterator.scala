@@ -162,6 +162,7 @@ final class ShuffleBlockFetcherIterator(
             results.put(new SuccessFetchResult(BlockId(blockId), address, sizeMap(blockId), buf))
             shuffleMetrics.incRemoteBytesRead(buf.size)
             shuffleMetrics.incRemoteBlocksFetched(1)
+            shuffleMetrics.remoteBlocksFinishTime = System.nanoTime()
           }
           logTrace("Got remote block " + blockId + " after " + Utils.getUsedTimeMs(startTime))
 
@@ -170,10 +171,11 @@ final class ShuffleBlockFetcherIterator(
         override def onBlockFetchFailure(blockId: String, e: Throwable): Unit = {
           logError(s"Failed to get block(s) from ${req.address.host}:${req.address.port}", e)
           results.put(new FailureFetchResult(BlockId(blockId), address, e))
+          shuffleMetrics.remoteBlocksFinishTime = System.nanoTime()
         }
-        shuffleMetrics.incRemoteBlocksFetchTime(System.nanoTime() - fetchStartTime)
       }
     )
+
   }
 
   private[this] def splitLocalRemoteBlocks(): ArrayBuffer[FetchRequest] = {
@@ -272,9 +274,9 @@ final class ShuffleBlockFetcherIterator(
     logInfo("Started " + numFetches + " remote fetches in" + Utils.getUsedTimeMs(startTime))
 
     // Get Local Blocks
-    //val startFetch: Long = System.nanoTime()
+    val startFetch: Long = System.nanoTime()
     fetchLocalBlocks()
-    //shuffleMetrics.incLocalBlocksFetchTime(System.nanoTime() - startFetch)
+    shuffleMetrics.incLocalBlocksFetchTime(System.nanoTime() - startFetch)
     logDebug("Got local blocks in " + Utils.getUsedTimeMs(startTime))
   }
 
