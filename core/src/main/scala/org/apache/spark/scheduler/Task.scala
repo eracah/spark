@@ -141,7 +141,7 @@ private[spark] abstract class Task[T](
    */
   def executorDeserializeTime: Long = _executorDeserializeTime
 
-  def deserializeGCTime: Long = _deserializeGCTime
+  def rddDeserializeGCTime: Long = _rddDeserializeGCTime
 
   /**
    * Kills a task by setting the interrupted flag to true. This relies on the upper level Spark
