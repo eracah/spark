@@ -17,6 +17,7 @@
 
 package org.apache.spark.scheduler
 
+import java.lang.management.ManagementFactory
 import java.nio.ByteBuffer
 
 import scala.language.existentials
@@ -60,11 +61,12 @@ private[spark] class ShuffleMapTask(
   override def runTask(context: TaskContext): MapStatus = {
     // Deserialize the RDD using the broadcast variable.
     val deserializeStartTime = System.currentTimeMillis()
+    val deserializeGCStartTime = computeTotalGcTime()
     val ser = SparkEnv.get.closureSerializer.newInstance()
     val (rdd, dep) = ser.deserialize[(RDD[_], ShuffleDependency[_, _, _])](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
     _executorDeserializeTime = System.currentTimeMillis() - deserializeStartTime
-
+    _rddDeserializeGCTime = computeTotalGcTime() - deserializeGCStartTime
     metrics = Some(context.taskMetrics)
     var writer: ShuffleWriter[Any, Any] = null
     try {
@@ -86,6 +88,9 @@ private[spark] class ShuffleMapTask(
     }
   }
 
+  private def computeTotalGcTime(): Long = {
+    ManagementFactory.getGarbageCollectorMXBeans.map(_.getCollectionTime).sum
+  }
   override def preferredLocations: Seq[TaskLocation] = preferredLocs
 
   override def toString: String = "ShuffleMapTask(%d, %d)".format(stageId, partitionId)

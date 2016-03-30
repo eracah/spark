@@ -204,8 +204,11 @@ private[spark] class Executor(
           throw new TaskKilledException
         }
 
+
         logDebug("Task " + taskId + "'s epoch is " + task.epoch)
         env.mapOutputTracker.updateEpoch(task.epoch)
+        val endTaskDeserializeGCTime: Long = computeTotalGcTime()
+
 
         // Run the actual task and measure its runtime.
         taskStart = System.currentTimeMillis()
@@ -229,6 +232,7 @@ private[spark] class Executor(
           }
         }
         val taskFinish = System.currentTimeMillis()
+        val taskGCTime: Long = computeTotalGcTime() - endTaskDeserializeGCTime
 
         // If the task has been killed, let's fail it.
         if (task.killed) {
@@ -239,14 +243,15 @@ private[spark] class Executor(
         val beforeSerialization = System.currentTimeMillis()
         val valueBytes = resultSer.serialize(value)
         val afterSerialization = System.currentTimeMillis()
+        val taskDeserializeGCTime: Long = endTaskDeserializeGCTime - startGCTime
 
         for (m <- task.metrics) {
           // Deserialization happens in two parts: first, we deserialize a Task object, which
           // includes the Partition. Second, Task.run() deserializes the RDD and function to be run.
           m.setExecutorDeserializeTime(
-            (taskStart - deserializeStartTime) + task.executorDeserializeTime)
+            (taskStart - deserializeStartTime) + (task.executorDeserializeTime - task.rddDeserializeGCTime) - taskDeserializeGCTime)
           // We need to subtract Task.run()'s deserialization time to avoid double-counting
-          m.setExecutorRunTime((taskFinish - taskStart) - task.executorDeserializeTime)
+          m.setExecutorRunTime((taskFinish - taskStart) - task.executorDeserializeTime - taskGCTime )
           m.setJvmGCTime(computeTotalGcTime() - startGCTime)
           m.setResultSerializationTime(afterSerialization - beforeSerialization)
           m.updateAccumulators()

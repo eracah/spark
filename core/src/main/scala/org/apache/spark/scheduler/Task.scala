@@ -130,6 +130,7 @@ private[spark] abstract class Task[T](
 
   protected var _executorDeserializeTime: Long = 0
 
+  protected var _rddDeserializeGCTime: Long = 0
   /**
    * Whether the task has been killed.
    */
@@ -139,6 +140,8 @@ private[spark] abstract class Task[T](
    * Returns the amount of time spent deserializing the RDD and function to be run.
    */
   def executorDeserializeTime: Long = _executorDeserializeTime
+
+  def deserializeGCTime: Long = _deserializeGCTime
 
   /**
    * Kills a task by setting the interrupted flag to true. This relies on the upper level Spark

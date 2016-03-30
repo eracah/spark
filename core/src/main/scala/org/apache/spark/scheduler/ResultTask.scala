@@ -20,10 +20,13 @@ package org.apache.spark.scheduler
 import java.nio.ByteBuffer
 
 import java.io._
-
+import java.lang.management.ManagementFactory
 import org.apache.spark._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
+
+
+
 
 /**
  * A task that sends back the output to the driver application.
@@ -57,11 +60,12 @@ private[spark] class ResultTask[T, U](
   override def runTask(context: TaskContext): U = {
     // Deserialize the RDD and the func using the broadcast variables.
     val deserializeStartTime = System.currentTimeMillis()
+    val deserializeGCStartTime = computeTotalGcTime()
     val ser = SparkEnv.get.closureSerializer.newInstance()
     val (rdd, func) = ser.deserialize[(RDD[T], (TaskContext, Iterator[T]) => U)](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
     _executorDeserializeTime = System.currentTimeMillis() - deserializeStartTime
-
+    _rddDeserializeGCTime = computeTotalGcTime() - deserializeGCStartTime
     metrics = Some(context.taskMetrics)
     func(context, rdd.iterator(partition, context))
   }
@@ -70,4 +74,9 @@ private[spark] class ResultTask[T, U](
   override def preferredLocations: Seq[TaskLocation] = preferredLocs
 
   override def toString: String = "ResultTask(" + stageId + ", " + partitionId + ")"
+
+  /** Returns the total amount of time this JVM process has spent in garbage collection. */
+  private def computeTotalGcTime(): Long = {
+    ManagementFactory.getGarbageCollectorMXBeans.map(_.getCollectionTime).sum
+  }
 }
