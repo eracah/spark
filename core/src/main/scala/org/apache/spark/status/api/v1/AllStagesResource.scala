@@ -211,6 +211,7 @@ private[v1] object AllStagesResource {
     new TaskMetricDistributions(
       quantiles = quantiles,
       executorDeserializeTime = metricQuantiles(_.executorDeserializeTime),
+      sendResultToDriverTime = metricQuantiles(_.sendResultToDriverTime),
       executorRunTime = metricQuantiles(_.executorRunTime),
       resultSize = metricQuantiles(_.resultSize),
       jvmGcTime = metricQuantiles(_.jvmGCTime),
@@ -231,6 +232,7 @@ private[v1] object AllStagesResource {
   def convertUiTaskMetrics(internal: InternalTaskMetrics): TaskMetrics = {
     new TaskMetrics(
       executorDeserializeTime = internal.executorDeserializeTime,
+      sendResultToDriverTime = internal.sendResultToDriverTime,
       executorRunTime = internal.executorRunTime,
       resultSize = internal.resultSize,
       jvmGcTime = internal.jvmGCTime,

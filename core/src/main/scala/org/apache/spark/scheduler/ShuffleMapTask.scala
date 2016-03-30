@@ -21,7 +21,7 @@ import java.lang.management.ManagementFactory
 import java.nio.ByteBuffer
 
 import scala.language.existentials
-
+import scala.collection.JavaConversions._
 import org.apache.spark._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD

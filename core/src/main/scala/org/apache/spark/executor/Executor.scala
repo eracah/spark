@@ -283,6 +283,11 @@ private[spark] class Executor(
 
         execBackend.statusUpdate(taskId, TaskState.FINISHED, serializedResult)
 
+        for (m <- task.metrics) {
+          m.setSendResultToDriverTime(System.currentTimeMillis() - afterSerialization)
+
+        }
+
       } catch {
         case ffe: FetchFailedException =>
           val reason = ffe.toTaskEndReason

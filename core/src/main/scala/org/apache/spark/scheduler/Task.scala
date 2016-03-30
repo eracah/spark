@@ -141,7 +141,12 @@ private[spark] abstract class Task[T](
    */
   def executorDeserializeTime: Long = _executorDeserializeTime
 
+  /**
+   * Returns the amount of time spent deserializing/unrolling the RDD's contents.
+   */
   def rddDeserializeGCTime: Long = _rddDeserializeGCTime
+
+
 
   /**
    * Kills a task by setting the interrupted flag to true. This relies on the upper level Spark

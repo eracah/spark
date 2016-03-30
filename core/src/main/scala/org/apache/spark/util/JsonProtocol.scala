@@ -303,6 +303,7 @@ private[spark] object JsonProtocol {
       }.getOrElse(JNothing)
     ("Host Name" -> taskMetrics.hostname) ~
     ("Executor Deserialize Time" -> taskMetrics.executorDeserializeTime) ~
+    ("Send Result To Driver Time" -> taskMetrics.sendResultToDriverTime) ~
     ("Executor Run Time" -> taskMetrics.executorRunTime) ~
     ("Result Size" -> taskMetrics.resultSize) ~
     ("JVM GC Time" -> taskMetrics.jvmGCTime) ~

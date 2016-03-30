@@ -55,6 +55,13 @@ class TaskMetrics extends Serializable {
   def executorDeserializeTime: Long = _executorDeserializeTime
   private[spark] def setExecutorDeserializeTime(value: Long) = _executorDeserializeTime = value
 
+  /**
+   * Time the executor spends sending result back to driver
+   */
+  private var _sendResultToDriverTime: Long = _
+  def sendResultToDriverTime: Long = _sendResultToDriverTime
+  private[spark] def setSendResultToDriverTime(value: Long) = _sendResultToDriverTime = value
+
 
   /**
    * Time the executor spends actually running the task (including fetching shuffle data)

@@ -24,8 +24,7 @@ import java.lang.management.ManagementFactory
 import org.apache.spark._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
-
-
+import scala.collection.JavaConversions._
 
 
 /**

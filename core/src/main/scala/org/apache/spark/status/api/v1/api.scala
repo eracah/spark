@@ -151,6 +151,7 @@ class TaskData private[spark](
 
 class TaskMetrics private[spark](
     val executorDeserializeTime: Long,
+    val sendResultToDriverTime: Long,
     val executorRunTime: Long,
     val resultSize: Long,
     val jvmGcTime: Long,
@@ -187,6 +188,7 @@ class TaskMetricDistributions private[spark](
     val quantiles: IndexedSeq[Double],
 
     val executorDeserializeTime: IndexedSeq[Double],
+    val sendResultToDriverTime: IndexedSeq[Double],
     val executorRunTime: IndexedSeq[Double],
     val resultSize: IndexedSeq[Double],
     val jvmGcTime: IndexedSeq[Double],
