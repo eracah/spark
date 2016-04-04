@@ -285,6 +285,7 @@ private[spark] class Executor(
 
         for (m <- task.metrics) {
           m.setSendResultToDriverTime(System.currentTimeMillis() - afterSerialization)
+          m.updateAccumulators()
 
         }
 
